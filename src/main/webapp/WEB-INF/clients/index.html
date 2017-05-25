@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>公交线路查询</title>
+    <link rel="stylesheet" type="text/css" href="/resources/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/resources/bootstrap-table/src/bootstrap-table.css">
+    <link rel="stylesheet" type="text/css" href="/resources/dist/css/AdminLTE.min.css">
+    <link rel="stylesheet" type="text/css" href="/resources/scrollBar.css">
+    <link rel="stylesheet" type="text/css" href="/resources/dist/css/skins/skin-black.css">
+    <script src="/resources/jquery.min.js"></script>
+    <script src="/resources/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/resources/dist/js/app.min.js"></script>
+    <script src="/resources/bootstrap-table/dist/bootstrap-table.js"></script>
+</head>
+<body class="layout-top-nav skin-black" onload="initIndex()">
+
+<div class="wrapper">
+    <header class="main-header">
+        <nav class="navbar navbar-static-top">
+            <div class="container">
+                <div class="navbar-header">
+                    <a href="/" class="navbar-brand">公交线路查询系统</a>
+                </div>
+            </div>
+            <!-- /.container-fluid -->
+        </nav>
+    </header>
+
+    <div class="content-wrapper">
+
+        <section class="content">
+
+            <div class="row">
+                <div class="col-sm-4">
+                    <div class="box box-primary">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">线路推荐</h3>
+                        </div>
+                        <!-- /.box-header -->
+                        <div class="box-body">
+                            <ul class="products-list product-list-in-box">
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="box box-primary">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">站点推荐</h3>
+                        </div>
+                        <!-- /.box-header -->
+                        <div class="box-body">
+                            <ul class="products-list product-list-in-box">
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="box box-primary">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">最新动态</h3>
+                        </div>
+                        <!-- /.box-header -->
+                        <div class="box-body">
+                            <ul class="products-list product-list-in-box">
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-8">
+                    <div class="container">
+                        <label class="col-sm-3">
+                            <select id="way" class="form-control" onchange="selChange(this)">
+                                <option value="1">线路查询</option>
+                                <option value="2">站点查询</option>
+                                <option value="3">起始点查询</option>
+                            </select>
+                        </label>
+
+                        <form id="form" class="col-sm-9 form-inline">
+                            <div class="form-group">
+                                <label for="busLineName">线路名称</label>
+                                <input type="text" class="form-control" id="busLineName">
+                            </div>
+                            <button type="button" class="btn btn-default" onclick="search()">查询</button>
+                        </form>
+                    </div>
+
+                    <br>
+
+                    <div class="box box-info">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">查询结果</h3>
+                        </div>
+                        <!-- /.box-header -->
+                        <div class="box-body">
+                            <div class="table-responsive">
+                                <table id="table"
+                                       data-toggle="table"
+                                       data-striped="true"
+                                       data-side-pagination="server"
+                                       data-pagination="true"
+                                       data-page-list="[5, 10, 15, 20]"
+                                       data-url="/busLineData">
+                                    <thead>
+                                    <tr>
+                                        <th data-field="busLineName" data-editable="true">线路名称</th>
+                                        <th data-field="startStation" data-editable="true">起点</th>
+                                        <th data-field="endStation" data-editable="true">终点</th>
+                                        <th data-field="startTime" data-editable="true">发车时间</th>
+                                        <th data-field="remarks" data-editable="true">备注</th>
+                                        <th data-field="operate"
+                                            data-formatter="operateFormatter"
+                                            data-events="operateEvents">操作
+                                        </th>
+                                    </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                            <!-- /.table-responsive -->
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <br>
+                    <br>
+                    <br>
+                    <div class="box box-primary">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">最新动态</h3>
+                        </div>
+                        <!-- /.box-header -->
+                        <div class="box-body">
+                            <ul id="news" class="products-list product-list-in-box">
+                            </ul>
+                        </div>
+                        <!-- /.box-body -->
+                        <div class="box-footer text-center">
+                            <a href="javascript:void(0)" class="uppercase">查看所有动态</a>
+                        </div>
+                        <!-- /.box-footer -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer class="main-footer navbar-fixed-bottom">
+        <div class="pull-right hidden-xs">
+            公交线路查询系统
+        </div>
+        <strong>Copyright &copy; 2016 <a href="#">Company</a>.</strong>
+    </footer>
+</div>
+
+<script>
+    var $table = $('#table');
+
+    window.operateEvents = {
+        'click #detail': function (e, value, row, index) {
+            var busLineId;
+            $.each(row, function (key, value) {
+                if (key == 'busLineId') {
+                    busLineId = value;
+                }
+            });
+            window.location.href = "/busStationDetail?busLineId=" + busLineId;
+        }
+    };
+
+    function selChange(obj) {
+
+        var oi = obj.options[obj.selectedIndex].value;
+
+        var ot = obj.options[obj.selectedIndex].innerText;
+        if (oi == "1") {
+            document.getElementById("form").innerHTML = "<div class='form-group'>" +
+                "<label for='busLineName'>线路名称</label>" +
+                "<input type='text' class='form-control' id='busLineName'>" +
+                "</div>" +
+                "  <button type='button' class='btn btn-default' onclick='search()'>搜索</button>";
+        } else if (oi == "2") {
+            document.getElementById("form").innerHTML = "<div class='form-group'>" +
+                "<label for='busStation'>站点名称</label>" +
+                "<input type='text' class='form-control' id='busStation'>" +
+                "</div>" +
+                "  <button type='button' class='btn btn-default' onclick='search()'>搜索</button>";
+        } else if (oi == "3") {
+            document.getElementById("form").innerHTML = "<div class='form-group'>" +
+                "<label for='startStation'>开始站点</label>" +
+                "<input type='text' class='form-control' id='startStation'>" +
+                "</div>" +
+                "<div class='form-group'>" +
+                "<label for='endStation'>到达站点</label>" +
+                "<input type='text' class='form-control' id='endStation'>" +
+                "</div>" +
+                "  <button type='button' class='btn btn-default' onclick='search()'>搜索</button>";
+        }
+    }
+
+    function search() {
+        var oi = $("#way").val();
+        if (oi == "1") {
+            $table.bootstrapTable('refresh', {url: '/searchByBusLine?busLineName=' + $("#busLineName").val()});
+        } else if (oi == "2") {
+            $table.bootstrapTable('refresh', {url: '/searchByBusStation?busStation=' + $("#busStation").val()});
+        } else if (oi == "3") {
+            $table.bootstrapTable('refresh', {url: '/searchByStartAndEnd?startStation=' + $("#startStation").val() + '&endStation=' + $("#endStation").val()});
+        }
+    }
+
+    function operateFormatter(value, row, index) {
+        return [
+            '<a id="detail" class="btn btn-default btn-xs">',
+            '查看详细信息',
+            '</a>'
+        ].join('');
+    }
+
+    function initIndex() {
+        var data = $.ajax({
+            url: '/findNewsByTime',
+            type: 'get',
+            dataType: 'json',
+            async: false,
+            success: function (data) {
+            },
+            error: function () {
+            }
+        }).responseJSON;
+
+        $.each(data, function (index, value) {
+            $("#news").append('<li class="item">' +
+                '<div class="product-info">' +
+                '<a href="javascript:void(0)" class="product-title">' + value.busLineId +
+                '<span class="label label-warning pull-right">' + value.newsTime + '</span></a>' +
+                '<span class="product-description">' + value.newsText +
+                '</span></div></li>');
+        });
+    }
+</script>
+
+</body>
+</html>

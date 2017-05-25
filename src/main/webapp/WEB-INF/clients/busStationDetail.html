@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>公交线路查询</title>
+    <link rel="stylesheet" type="text/css" href="/resources/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/resources/bootstrap-table/src/bootstrap-table.css">
+    <link rel="stylesheet" type="text/css" href="/resources/dist/css/AdminLTE.min.css">
+    <link rel="stylesheet" type="text/css" href="/resources/dist/css/skins/skin-black.css">
+    <link rel="stylesheet" type="text/css" href="/resources/scrollBar.css">
+    <script src="/resources/jquery.min.js"></script>
+    <script src="/resources/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/resources/dist/js/app.min.js"></script>
+    <script src="/resources/bootstrap-table/dist/bootstrap-table.js"></script>
+</head>
+<body class="layout-top-nav skin-black" onload="addStation()">
+
+<div class="wrapper">
+
+    <header class="main-header">
+        <nav class="navbar navbar-static-top">
+            <div class="container">
+                <div class="navbar-header">
+                    <a href="/" class="navbar-brand">公交线路查询系统</a>
+                </div>
+            </div>
+            <!-- /.container-fluid -->
+        </nav>
+    </header>
+
+    <div class="content-wrapper">
+        <div class="container">
+            <section class="content">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="box box-default">
+                            <div class="box-header with-border">
+                                <i class="fa fa-warning"></i>
+
+                                <h3 class="box-title">线路简介</h3>
+                            </div>
+                            <!-- /.box-header -->
+                            <div class="box-body">
+                                <h4 th:text="${session.busLine.description}"></h4>
+                            </div>
+                            <!-- /.box-body -->
+                        </div>
+                        <ul id="timeline" class="timeline">
+                            <!-- timeline time label -->
+                            <li class="time-label">
+                  <span class="bg-red">
+                    起点
+                  </span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="box box-default">
+                            <div class="box-header with-border">
+                                <i class="fa fa-warning"></i>
+
+                                <h3 class="box-title">线路动态</h3>
+                            </div>
+                            <!-- /.box-header -->
+                            <div class="box-body">
+                                <div th:each="sb : ${session.newsList}" class="alert alert-success alert-dismissible">
+                                    <h4 th:text="${{sb.newsText}}"></h4>
+                                </div>
+                            </div>
+                            <!-- /.box-body -->
+                        </div>
+                        <!-- /.box -->
+                        <!-- Box Comment -->
+                        <div class="box box-widget">
+                            <div class="box-header with-border">
+                                <div class="user-block">
+                                    <span class="username" th:text="${session.busLine.busLineId}"></span>
+                                    <span class="description"></span>
+                                </div>
+                            </div>
+                            <div class="box-body">
+                                <p>乘客对该线路的建议</p>
+                                <!-- Social sharing buttons -->
+                                <button type="button" class="btn btn-default btn-xs"><i class="fa fa-share"></i> Share
+                                </button>
+                                <button type="button" class="btn btn-default btn-xs"><i class="fa fa-thumbs-o-up"></i>
+                                    Like
+                                </button>
+                                <span class="pull-right text-muted">45 likes - 2 comments</span>
+                            </div>
+                            <!-- /.box-body -->
+                            <div id="busLineComment" class="box-footer box-comments">
+
+                            </div>
+                            <div class="box-footer">
+                                <div class="row">
+                                    <div class="col-sm-9">
+                                        <input id="comment" type="text" class="form-control input-sm"
+                                               placeholder="Press enter to post comment">
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <button type="button" class="form-control btn btn-default col-sm-3"
+                                                onclick="addComment()">提交
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+
+    <footer class="main-footer navbar-fixed-bottom">
+        <div class="pull-right hidden-xs">
+            公交线路查询系统管理端
+        </div>
+        <strong>Copyright &copy; 2016 <a href="#">Company</a>.</strong>
+    </footer>
+</div>
+<script th:inline="javaScript">
+    var $table = $('#table');
+
+    window.operateEvents = {
+        'click #detail': function (e, value, row, index) {
+            window.location.href = "/busStationDetail";
+        }
+    };
+
+    function selChange(obj) {
+
+        var oi = obj.options[obj.selectedIndex].value;
+
+        var ot = obj.options[obj.selectedIndex].innerText;
+        if (oi == "1") {
+            document.getElementById("form").innerHTML = "<div class='form-group'>" +
+                "<label for='busLineName'>线路名称</label>" +
+                "<input type='text' class='form-control' id='busLineName'>" +
+                "</div>" +
+                "<button type='button' class='btn btn-default' onclick='search()'>搜索</button>";
+        } else if (oi == "2") {
+            document.getElementById("form").innerHTML = "<div class='form-group'>" +
+                "<label for='busStation'>站点名称</label>" +
+                "<input type='text' class='form-control' id='busStation'>" +
+                "</div>" +
+                "<button type='button' class='btn btn-default' onclick='search()'>搜索</button>";
+        } else if (oi == "3") {
+            document.getElementById("form").innerHTML = "<div class='form-group'>" +
+                "<label for='startStation'>开始站点</label>" +
+                "<input type='text' class='form-control' id='startStation'>" +
+                "</div>" +
+                "<div class='form-group'>" +
+                "<label id='endStation'>到达站点</label>" +
+                "<input type='text' class='form-control' id='endStation'>" +
+                "</div>" +
+                "<button type='button' class='btn btn-default' onclick='search()'>搜索</button>";
+        }
+    }
+
+    function search() {
+        var oi = $("#way").val();
+        if (oi == "1") {
+            $table.bootstrapTable('refresh', {url: '/searchByBusLine?busLineName=' + $("#busLineName").val()});
+        } else if (oi == "2") {
+            $table.bootstrapTable('refresh', {url: '/searchByBusStation?busStation=' + $("#busStation").val()});
+        } else if (oi == "3") {
+            $table.bootstrapTable('refresh', {url: '/searchByStartAndEnd?startStation=' + $("#startStation").val() + '&endStation=' + $("#endStation").val()});
+        }
+    }
+
+    function operateFormatter(value, row, index) {
+        return [
+            '<a id="detail" class="btn btn-default btn-xs">',
+            '查看详细信息',
+            '</a>',
+        ].join('');
+    }
+
+    function addStation() {
+        var busStationData = [[${session.busStations}]];
+
+        $.each(busStationData, function (index, value) {
+            $("#timeline").append('<li><i class="fa fa-envelope bg-blue"><span>' + value.seqNumber + '</span></i>' +
+                '<div class="timeline-item">' +
+                '<span class="time"><i class="fa fa-clock-o"></i>' + value.arrivalTime + '</span>' +
+                '<h3 class="timeline-header">' + value.busStationName + '</h3>' +
+                '<div class="timeline-body">' +
+                '</div>' +
+                '<div class="timeline-footer">' +
+                '<a class="btn btn-primary btn-xs">Read more</a>' +
+                '</div></div>' +
+                '</li>');
+        });
+        $("#timeline").append('<li class="time-label">' +
+            '<span class="bg-red">终点' +
+            '</span></li>');
+
+        loadComment();
+    }
+
+    function loadComment() {
+        var busLineId = [[${session.busLine.busLineId}]];
+        var data = $.ajax({
+            url: '/findCommentByBusLineId',
+            type: 'get',
+            data: 'busLineId=' + busLineId,
+            dataType: 'json',
+            async: false,
+            success: function (data) {
+            },
+            error: function () {
+            }
+        }).responseJSON;
+
+        $.each(data, function (index, value) {
+            $("#busLineComment").append('<div class="box-comment">' +
+                '<div class="comment-text">' +
+                '<span class="username">乘客' +
+                '<span class="text-muted pull-right">' + value.commentTime + '</span></span>' + value.commentText +
+                '</div></div>');
+        });
+    }
+
+    function addComment() {
+        var busLineId = [[${session.busLine.busLineId}]];
+        var commentText = $("#comment").val();
+        var data = $.ajax({
+            url: '/addComment',
+            type: 'post',
+            data: 'busLineId=' + busLineId + '&commentText=' + commentText,
+            dataType: 'json',
+            async: false,
+            success: function (data) {
+            },
+            error: function () {
+            }
+        });
+
+        $("#busLineComment").empty();
+        loadComment();
+    }
+</script>
+
+</body>
+</html>
