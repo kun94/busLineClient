@@ -10,4 +10,6 @@ public interface CommentRepository {
     List<Comment> findByBusLineId(String busLineId);
 
     boolean addComment(Comment comment);
+
+    boolean addCommentLike(String commentId);
 }

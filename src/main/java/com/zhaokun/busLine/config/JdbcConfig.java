@@ -60,4 +60,9 @@ public class JdbcConfig {
     public JdbcCommentRepository jdbcCommentRepository(JdbcTemplate jdbcTemplate) {
         return new JdbcCommentRepository(jdbcTemplate);
     }
+
+    @Bean
+    public JdbcReplyRepository jdbcReplyRepository(JdbcTemplate jdbcTemplate) {
+        return new JdbcReplyRepository(jdbcTemplate);
+    }
 }

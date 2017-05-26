@@ -33,6 +33,12 @@ public class JdbcCommentRepository implements CommentRepository {
         return true;
     }
 
+    @Override
+    public boolean addCommentLike(String commentId) {
+        this.jdbcTemplate.update("UPDATE BUSLINE_COMMENT SET COMMENTLIKE = COMMENTLIKE + 1 WHERE COMMENTID = ?", commentId);
+        return true;
+    }
+
     private static final class CommentMapper implements RowMapper<Comment> {
         public Comment mapRow(ResultSet resultSet, int rowNum) throws SQLException {
             Comment comment = new Comment();

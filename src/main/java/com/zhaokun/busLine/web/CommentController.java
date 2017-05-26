@@ -43,4 +43,11 @@ public class CommentController {
         System.out.println(gson.toJson(comments));
         response.getWriter().write(gson.toJson(comments));
     }
+
+    @RequestMapping(value = "/addCommentLike", method = RequestMethod.GET)
+    public void addCommentLike(HttpServletResponse response, HttpServletRequest request, Model model) throws IOException {
+        String commentId = request.getParameter("commentId");
+        System.out.println(commentId);
+        commentRepository.addCommentLike(commentId);
+    }
 }

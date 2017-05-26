@@ -223,10 +223,50 @@
         $.each(data, function (index, value) {
             $("#busLineComment").append('<div class="box-comment">' +
                 '<div class="comment-text">' +
-                '<span class="username">乘客' +
+                '<span class="username">乘客 ' + value.commentLike + 'likes' +
                 '<span class="text-muted pull-right">' + value.commentTime + '</span></span>' + value.commentText +
-                '</div></div>');
+                '</div>' +
+                '<button id="' + value.commentId + '" type="button" class="btn btn-success btn-xs pull-right" onclick="addLike(this)"><i class="fa fa-thumbs-o-up"></i> like' +
+                '</button>' +
+                '</div>');
+
+            var data1 = $.ajax({
+                url: '/findReplyByCommentId',
+                type: 'get',
+                data: 'commentId=' + value.commentId,
+                dataType: 'json',
+                async: false,
+                success: function (data) {
+                },
+                error: function () {
+                }
+            }).responseJSON;
+
+            $.each(data1, function (index, value) {
+                $("#busLineComment").append('<div class="box-comment" style="background-color: #00a7d0">' +
+                    '<div class="comment-text">' +
+                    '<span class="username">管理员---' + value.replyTitle +
+                    '<span class="text-muted pull-right">' + value.replyTime + '</span></span>' + value.replyText +
+                    '</div>' +
+                    '</div>');
+            });
         });
+    }
+
+    function addLike(val) {
+        var data = $.ajax({
+            url: '/addCommentLike',
+            type: 'get',
+            data: 'commentId=' + val.id,
+            dataType: 'json',
+            async: false,
+            success: function (data) {
+            },
+            error: function () {
+            }
+        });
+        $("#busLineComment").empty();
+        loadComment();
     }
 
     function addComment() {
